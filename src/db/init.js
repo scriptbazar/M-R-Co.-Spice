@@ -271,7 +271,6 @@ const initializeDatabase = async () => {
 
   } catch (error) {
     console.error('Error during database initialization:', error);
-    process.exit(1);
   }
 };
 

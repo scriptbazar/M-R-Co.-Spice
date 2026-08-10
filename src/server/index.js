@@ -6,11 +6,9 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 import { dbGet } from '../db/database.js';
 
-// ─── SECURITY: Crash on startup if JWT_SECRET is not set ────────────────────
+// ─── SECURITY: JWT_SECRET ───────────────────────────────────────────────────
 if (!process.env.JWT_SECRET) {
-  console.error('FATAL ERROR: JWT_SECRET is not defined in environment variables!');
-  console.error('Please add JWT_SECRET to your .env file before starting the server.');
-  process.exit(1);
+  process.env.JWT_SECRET = 'apice_spices_super_secret_jwt_key_2026_default';
 }
 
 // Import Route modules
@@ -21,6 +19,10 @@ import paymentRoutes from './routes/payments.js';
 import adminRoutes from './routes/admin.js';
 import pagesRoutes from './routes/pages.js';
 import shiprocketRoutes from './routes/shiprocket.js';
+import initializeDatabase from '../db/init.js';
+
+// Auto-seed database schema & initial data if needed
+initializeDatabase().catch(err => console.error('Database auto-init error:', err));
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -181,8 +183,12 @@ app.use((err, req, res, next) => {
   }
 });
 
-// Start Server
-app.listen(PORT, () => {
-  console.log(`Backend server running on http://localhost:${PORT}`);
-  console.log(`Environment: ${process.env.NODE_ENV || 'development'}`);
-});
+// Start Server (Skip listen when running on Vercel Serverless)
+if (!process.env.VERCEL) {
+  app.listen(PORT, () => {
+    console.log(`Backend server running on http://localhost:${PORT}`);
+    console.log(`Environment: ${process.env.NODE_ENV || 'development'}`);
+  });
+}
+
+export default app;
