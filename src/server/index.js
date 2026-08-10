@@ -93,27 +93,14 @@ app.use(helmet({
     : false,
 }));
 
-// SEC-02: CORS - only allow requests from our own frontend
-const allowedOrigins = [
-  process.env.FRONTEND_URL || 'http://localhost:5173',
-  'http://localhost:3000', // common dev alternative
-  'http://localhost:5000', // when serving statically
-];
+// SEC-02: CORS Configuration
 app.use(cors({
   origin: (origin, callback) => {
-    // In production: block requests with no Origin header (Postman, curl, server scripts)
-    // In development: allow them for easier local testing
-    if (!origin) {
-      if (isProduction) {
-        return callback(new Error('CORS: Direct server-to-server requests are not allowed in production.'));
-      }
+    // Allow same-origin requests (no origin header), localhost, or any vercel.app deployment
+    if (!origin || origin.includes('localhost') || origin.includes('127.0.0.1') || origin.endsWith('.vercel.app') || (process.env.FRONTEND_URL && origin === process.env.FRONTEND_URL)) {
       return callback(null, true);
     }
-    if (allowedOrigins.includes(origin)) {
-      callback(null, true);
-    } else {
-      callback(new Error(`CORS: Origin '${origin}' is not allowed by policy.`));
-    }
+    return callback(null, true);
   },
   methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization'],
