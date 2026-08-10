@@ -5,6 +5,8 @@
   "type": "module",
   "main": "src/server/index.js",
   "scripts": {
+    "build": "cd client && npm install && npm run build",
+    "vercel-build": "cd client && npm install && npm run build",
     "init-db": "node src/db/init.js",
     "backend": "node src/server/index.js",
     "frontend": "npm run --prefix client dev",
