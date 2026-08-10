@@ -21,8 +21,16 @@ import pagesRoutes from './routes/pages.js';
 import shiprocketRoutes from './routes/shiprocket.js';
 import initializeDatabase from '../db/init.js';
 
-// Auto-seed database schema & initial data if needed
-initializeDatabase().catch(err => console.error('Database auto-init error:', err));
+let initDbPromise = null;
+const ensureDb = async () => {
+  if (!initDbPromise) {
+    initDbPromise = initializeDatabase().catch(err => {
+      console.error('Database auto-init error:', err);
+      initDbPromise = null;
+    });
+  }
+  return initDbPromise;
+};
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -30,6 +38,14 @@ const __dirname = path.dirname(__filename);
 const app = express();
 const PORT = process.env.PORT || 5000;
 const isProduction = process.env.NODE_ENV === 'production';
+
+// Ensure DB is initialized before processing any API request
+app.use(async (req, res, next) => {
+  if (req.path.startsWith('/api')) {
+    await ensureDb();
+  }
+  next();
+});
 
 // Redirect HTTP to HTTPS in production
 if (isProduction) {
