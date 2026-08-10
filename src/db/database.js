@@ -5,7 +5,11 @@ import { fileURLToPath } from 'url';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-const dbPath = path.resolve(__dirname, '../../database.db');
+const isVercel = process.env.VERCEL || process.env.NOW_BUILDER;
+const dbPath = isVercel 
+  ? path.join('/tmp', 'database.db')
+  : path.resolve(__dirname, '../../database.db');
+
 const db = new sqlite3.Database(dbPath, (err) => {
   if (err) {
     console.error('Error opening database:', err.message);

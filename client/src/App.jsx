@@ -389,8 +389,8 @@ export default function App() {
       body: JSON.stringify({ email: loginEmail, password: loginPassword })
     })
       .then(async res => {
-        const data = await res.json();
-        if (!res.ok) throw new Error(data.error);
+        const data = await res.json().catch(() => ({ error: 'Server error. Please try again later.' }));
+        if (!res.ok) throw new Error(data.error || 'Server connection issue');
         return data;
       })
       .then(data => {
@@ -429,8 +429,8 @@ export default function App() {
       })
     })
       .then(async res => {
-        const data = await res.json();
-        if (!res.ok) throw new Error(data.error);
+        const data = await res.json().catch(() => ({ error: 'Server error. Please try again later.' }));
+        if (!res.ok) throw new Error(data.error || 'Server connection issue');
         return data;
       })
       .then(data => {
